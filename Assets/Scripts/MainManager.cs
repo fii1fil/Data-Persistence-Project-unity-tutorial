@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 
 public class MainManager : MonoBehaviour
 {
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
-
+    public Button exitGameButton;
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
-    
+
     private bool m_Started = false;
     private int m_Points;
     
@@ -22,6 +28,8 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        BestScoreText.text = $"Best Score: {PersistentManager.Instance.playerName}:" +
+            $" {PersistentManager.Instance.bestScore}";
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -71,6 +79,26 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
+       
         GameOverText.SetActive(true);
+        exitGameButton.gameObject.SetActive(true);
+        
+        
+
+        if (m_Points > PersistentManager.Instance.bestScore)
+        {
+            PersistentManager.Instance.bestScore = m_Points;
+        }
+        
+    }
+
+    public void GameExit()
+    {
+        PersistentManager.Instance.SavePlayerData();
+#if UNITY_EDITOR
+        EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
     }
 }
